@@ -25,7 +25,6 @@ yarn vercel dev
 :global aliip
 :if ($ipaddr != $aliip) do={
     :local result [/tool fetch url="https://ros-ddns-serverless.vercel.app/api/aliyun?id=$id&secret=$secret&record=$record&domain=$domain&ip=$ipaddr" as-value output=user];
-    :global result
     :set aliip $ipaddr
 }
 ```
