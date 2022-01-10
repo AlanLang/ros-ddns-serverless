@@ -1,33 +1,113 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { checkQuery } from "../tool"
-const Core = require('@alicloud/pop-core');
+// const Core = require('@alicloud/pop-core');
+import Core from "@alicloud/pop-core"
+
+interface RecordType {
+  DomainName: string;
+  RecordId:   string;
+  RR:         string;
+  Type:       string;
+  Value:      string;
+  Line:       string;
+  Priority:   number;
+  TTL:        number;
+  Status:     string;
+  Locked:     boolean;
+}
+
+type Params = {domain: string; record: string; ip: string; id: string; secret: string}
+
+
+class Aliyun {
+  private client: Core;
+  private domain: string;
+  private record: string;
+  private ip: string;
+
+  constructor({domain, record, ip, id, secret}: Params){
+    this.domain = domain;
+    this.record = record;
+    this.ip = ip;
+    this.client = new Core({
+      accessKeyId: id,
+      accessKeySecret: secret,
+      endpoint: 'https://alidns.aliyuncs.com',
+      apiVersion: '2015-01-09'
+    });
+  }
+
+  public addDomainRecord(){
+    var params = {
+      "DomainName": this.domain,
+      "RR": this.record,
+      "Type": "A",
+      "Value": this.ip
+    }
+    var requestOption = {
+      method: 'POST'
+    };
+    return this.client.request<{RequestId: string; RecordId: string}>('AddDomainRecord', params, requestOption);
+  }
+
+  public describeDomainRecords(){
+    return this.client.request<{RequestId: string; TotalCount: number; DomainRecords: {Record: RecordType[]}}>('DescribeDomainRecords', {
+      DomainName: this.domain,
+      KeyWord: this.record,
+      SearchMode: "EXACT",
+    },{
+      method: 'POST'
+    })
+  }
+
+  public UpdateDomainRecord(id: string){
+    var params = {
+      "RecordId": id,
+      "DomainName": this.domain,
+      "RR": this.record,
+      "Type": "A",
+      "Value": this.ip
+    }
+    return this.client.request<{RequestId: string; RecordId: string}>("UpdateDomainRecord", params, {
+      method: 'POST'
+    })
+  }
+}
+
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
-const error = checkQuery(req.query)
+    const error = checkQuery(req.query)
     if(error) {
         res.send({
             error: error
         })
         return
     }
-    const {id, secret, domain, record, ip} = req.query;
-    var client = new Core({
-        accessKeyId: id,
-        accessKeySecret: secret,
-        endpoint: 'https://alidns.aliyuncs.com',
-        apiVersion: '2015-01-09'
-      });
-      var params = {
-        "DomainName": domain,
-        "RR": record,
-        "Type": "A",
-        "Value": ip
+
+    try {
+      let result: { RequestId: string; RecordId: string }
+      const params = req.query as Params;
+      const aliyun = new Aliyun(params)
+      const record = await aliyun.describeDomainRecords()
+      if(record.TotalCount > 0) {
+        const domainRecord = record.DomainRecords.Record[0]
+        if(domainRecord.Value !== params.ip) {
+          result = await aliyun.UpdateDomainRecord(domainRecord.RecordId)
+        } else {
+          result = {RecordId: domainRecord.RecordId, RequestId:"" }
+        }
+      } else {
+        result = await aliyun.addDomainRecord()
       }
-      var requestOption = {
-        method: 'POST'
-      };
-      client.request('AddDomainRecord', params, requestOption).then((result) => {
-        res.send(result);
-      }, (ex) => {
-        res.send(ex);
+      if (result.RecordId) {
+        res.send({
+          success: true
+        })
+      } else {
+        res.send(result)
+      }
+    } catch (e) {
+      res.send({
+        error: e
       })
+    }
 }
