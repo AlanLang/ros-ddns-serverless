@@ -1,4 +1,4 @@
-export const checkQuery = (params: any) => {
+export const checkQuery = (params: {[key: string]: string}) => {
     const queryList = ["id", "secret", "domain", "record", "ip"]
     for (let index = 0; index < queryList.length; index++) {
         const element = queryList[index];

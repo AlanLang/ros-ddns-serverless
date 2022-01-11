@@ -1,0 +1,93 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "quotes": [1, "double"],
+    "prefer-const": 2,
+    "no-console": [
+      1,
+      {
+        "allow": [
+          "warn",
+          "error"
+        ]
+      }
+    ],
+    "no-param-reassign": [
+      0,
+      {
+        "props": true
+      }
+    ],
+    "no-else-return": [
+      2,
+      {
+        "allowElseIf": false
+      }
+    ],
+    "no-unneeded-ternary": [
+      2,
+      {
+        "defaultAssignment": false
+      }
+    ],
+    "prefer-template": [
+      2
+    ],
+    "prefer-arrow-callback": [
+      1
+    ],
+    "prefer-destructuring": [
+      1,
+      {
+        "object": true,
+        "array": false
+      }
+    ],
+    "object-shorthand": [
+      2,
+      "always",
+      {
+        "avoidQuotes": true
+      }
+    ],
+    "one-var": [
+      2,
+      "never"
+    ],
+    "template-curly-spacing": [
+      2
+    ],
+    "space-before-function-paren": [
+      2,
+      {
+        "anonymous": "never",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
+    "dot-notation": [
+      1,
+      {
+        "allowKeywords": true
+      }
+    ],
+    "@typescript-eslint/array-type": [
+      2
+    ],
+    "@typescript-eslint/explicit-module-boundary-types": [
+      0
+    ],
+    "@typescript-eslint/explicit-member-accessibility": [
+      2
+    ]
+  }
+}
