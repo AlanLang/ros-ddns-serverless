@@ -2,25 +2,28 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 
 export type Params = {
   type: string;
-  record: string;
+  name: string;
   ip: string;
   identifier: string;
   secret: string;
+  domain: string;
 };
 
 export abstract class DnsServer<T> {
-  protected type: string;
-  protected record: string;
+  protected type: string; // 解析类型：A AAAA 等
+  protected name: string; // 地址前缀
+  protected domain: string; //地址主机
   protected ip: string;
   protected identifier: string;
   protected secret: string;
 
-  public constructor({ type: domain, record, ip, identifier, secret }: Params) {
-    this.type = domain;
-    this.record = record;
+  public constructor({ type, name, ip, identifier, secret, domain }: Params) {
+    this.type = type;
+    this.name = name;
     this.ip = ip;
     this.identifier = identifier;
     this.secret = secret;
+    this.domain = domain;
   }
 
   public abstract getRecord(): Promise<T | undefined>;
@@ -33,7 +36,7 @@ export abstract class DnsServer<T> {
 }
 
 export const checkQuery = (params: { [key: string]: string }) => {
-  const queryList = ["type", "record", "ip", "identifier", "secret"];
+  const queryList = ["type", "name", "ip", "identifier", "secret"];
   for (let index = 0; index < queryList.length; index++) {
     const element = queryList[index];
     if (!params[element]) {

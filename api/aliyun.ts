@@ -34,8 +34,8 @@ export class Aliyun extends DnsServer<RecordType> {
 
   public async addRecord() {
     const params = {
-      DomainName: this.record,
-      RR: getRecordKey(this.record),
+      DomainName: this.domain,
+      RR: this.name,
       Type: this.type,
       Value: this.ip,
     };
@@ -58,8 +58,8 @@ export class Aliyun extends DnsServer<RecordType> {
     }>(
       "DescribeDomainRecords",
       {
-        DomainName: this.record,
-        KeyWord: this.record,
+        DomainName: this.domain,
+        KeyWord: this.name,
         SearchMode: "EXACT",
       },
       {
@@ -79,8 +79,8 @@ export class Aliyun extends DnsServer<RecordType> {
   public async updateRecord(record: RecordType) {
     const params = {
       RecordId: record.RecordId,
-      DomainName: this.record,
-      RR: getRecordKey(this.record),
+      DomainName: this.domain,
+      RR: this.name,
       Type: this.type,
       Value: this.ip,
     };

@@ -47,7 +47,7 @@ export class Cloudflare extends DnsServer<Result> {
 
   public async getRecord(): Promise<Result | undefined> {
     const { data, status } = await axios.get<CloudflareResult>(
-      `https://api.cloudflare.com/client/v4/zones/${this.identifier}/dns_records?type=${this.type}&name=${this.record}&order=type&direction=desc&match=all`,
+      `https://api.cloudflare.com/client/v4/zones/${this.identifier}/dns_records?type=${this.type}&name=${this.name}&order=type&direction=desc&match=all`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -66,7 +66,7 @@ export class Cloudflare extends DnsServer<Result> {
       `https://api.cloudflare.com/client/v4/zones/${this.identifier}/dns_records`,
       {
         type: this.type,
-        name: this.record,
+        name: this.name,
         content: this.ip,
         ttl: 1,
         priority: 10,
@@ -90,7 +90,7 @@ export class Cloudflare extends DnsServer<Result> {
       `https://api.cloudflare.com/client/v4/zones/${this.identifier}/dns_records/${record.id}`,
       {
         type: this.type,
-        name: this.record,
+        name: this.name,
         content: this.ip,
         ttl: 1,
         proxied: false,
