@@ -36,7 +36,7 @@ export abstract class DnsServer<T> {
 }
 
 export const checkQuery = (params: { [key: string]: string }) => {
-  const queryList = ["type", "name", "ip", "identifier", "secret"];
+  const queryList = ["type", "name", "ip", "identifier", "secret", "domain"];
   for (let index = 0; index < queryList.length; index++) {
     const element = queryList[index];
     if (!params[element]) {
