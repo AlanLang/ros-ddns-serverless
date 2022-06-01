@@ -14,6 +14,11 @@ interface RecordType {
   Locked: boolean;
 }
 
+function getRecordKey(record: string): string {
+  const keys = record.split(".");
+  return keys.length > 0 ? keys[0] : record;
+}
+
 export class Aliyun extends DnsServer<RecordType> {
   private client: Core;
 
@@ -30,7 +35,7 @@ export class Aliyun extends DnsServer<RecordType> {
   public async addRecord() {
     const params = {
       DomainName: this.record,
-      RR: this.record,
+      RR: getRecordKey(this.record),
       Type: this.type,
       Value: this.ip,
     };
@@ -75,7 +80,7 @@ export class Aliyun extends DnsServer<RecordType> {
     const params = {
       RecordId: record.RecordId,
       DomainName: this.record,
-      RR: this.record,
+      RR: getRecordKey(this.record),
       Type: this.type,
       Value: this.ip,
     };
