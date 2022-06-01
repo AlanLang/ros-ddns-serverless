@@ -15,16 +15,16 @@ yarn vercel dev
 添加ROS脚本，记得请求地址替换成自己的
 输入时最好把中文注释给删了
 ```
-:local id ""  #阿里云ID
-:local secret "" #阿里云secret
-:local domain "baidu.com" #填入主域名，不要带www
-:local record "www" #填入需要解析的域名前缀 
+:local identifier "" #id
+:local secret "" #token
+:local type 解析类型，默认为A
+:local record 需要解析的域名 
 :local pppoe "pppoe-out1" #确定你的路由器的网口名称
 :local ipaddr [/ip address get [/ip address find interface=$pppoe] address]
 :set ipaddr [:pick $ipaddr 0 ([len $ipaddr] -3)]
 :global aliip
 :if ($ipaddr != $aliip) do={
-    :local result [/tool fetch url="https://ros-ddns-serverless.vercel.app/api/aliyun?id=$id&secret=$secret&record=$record&domain=$domain&ip=$ipaddr" as-value output=user];
+    :local result [/tool fetch url="https://ros-ddns-serverless.vercel.app/api/aliyun?identifier=$identifier&secret=$secret&record=$record&type=$type&ip=$ipaddr" as-value output=user];
     :set aliip $ipaddr
 }
 ```

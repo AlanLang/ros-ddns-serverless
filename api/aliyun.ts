@@ -1,113 +1,93 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
-import { checkQuery } from "../tool"
-// const Core = require('@alicloud/pop-core');
-import Core from "@alicloud/pop-core"
+import Core from "@alicloud/pop-core";
+import { DnsServer, Params, recordDns } from "./dnsServer";
 
 interface RecordType {
   DomainName: string;
-  RecordId:   string;
-  RR:         string;
-  Type:       string;
-  Value:      string;
-  Line:       string;
-  Priority:   number;
-  TTL:        number;
-  Status:     string;
-  Locked:     boolean;
+  RecordId: string;
+  RR: string;
+  Type: string;
+  Value: string;
+  Line: string;
+  Priority: number;
+  TTL: number;
+  Status: string;
+  Locked: boolean;
 }
 
-type Params = {domain: string; record: string; ip: string; id: string; secret: string}
-
-
-class Aliyun {
+export class Aliyun extends DnsServer<RecordType> {
   private client: Core;
-  private domain: string;
-  private record: string;
-  private ip: string;
 
-  public constructor({domain, record, ip, id, secret}: Params){
-    this.domain = domain;
-    this.record = record;
-    this.ip = ip;
+  public constructor(p: Params) {
+    super(p);
     this.client = new Core({
-      accessKeyId: id,
-      accessKeySecret: secret,
+      accessKeyId: this.identifier,
+      accessKeySecret: this.secret,
       endpoint: "https://alidns.aliyuncs.com",
-      apiVersion: "2015-01-09"
+      apiVersion: "2015-01-09",
     });
   }
 
-  public addDomainRecord(){
+  public async addRecord() {
     const params = {
-      "DomainName": this.domain,
-      "RR": this.record,
-      "Type": "A",
-      "Value": this.ip
-    }
-    const requestOption = {
-      method: "POST"
+      DomainName: this.record,
+      RR: this.record,
+      Type: this.type,
+      Value: this.ip,
     };
-    return this.client.request<{RequestId: string; RecordId: string}>("AddDomainRecord", params, requestOption);
+    const requestOption = {
+      method: "POST",
+    };
+    await this.client.request<{ RequestId: string; RecordId: string }>(
+      "AddDomainRecord",
+      params,
+      requestOption
+    );
+    return true;
   }
 
-  public describeDomainRecords(){
-    return this.client.request<{RequestId: string; TotalCount: number; DomainRecords: {Record: RecordType[]}}>("DescribeDomainRecords", {
-      DomainName: this.domain,
-      KeyWord: this.record,
-      SearchMode: "EXACT",
-    },{
-      method: "POST"
-    })
+  public async getRecord() {
+    const result = await this.client.request<{
+      RequestId: string;
+      TotalCount: number;
+      DomainRecords: { Record: RecordType[] };
+    }>(
+      "DescribeDomainRecords",
+      {
+        DomainName: this.record,
+        KeyWord: this.record,
+        SearchMode: "EXACT",
+      },
+      {
+        method: "POST",
+      }
+    );
+    if (result && result.DomainRecords.Record.length > 0) {
+      return result.DomainRecords.Record[0];
+    }
+    return undefined;
   }
 
-  public UpdateDomainRecord(id: string){
+  public isSameRecord(ip: string, record: RecordType) {
+    return ip === record.Value;
+  }
+
+  public async updateRecord(record: RecordType) {
     const params = {
-      "RecordId": id,
-      "DomainName": this.domain,
-      "RR": this.record,
-      "Type": "A",
-      "Value": this.ip
-    }
-    return this.client.request<{RequestId: string; RecordId: string}>("UpdateDomainRecord", params, {
-      method: "POST"
-    })
+      RecordId: record.RecordId,
+      DomainName: this.record,
+      RR: this.record,
+      Type: this.type,
+      Value: this.ip,
+    };
+    await this.client.request<{ RequestId: string; RecordId: string }>(
+      "UpdateDomainRecord",
+      params,
+      {
+        method: "POST",
+      }
+    );
+    return true;
   }
 }
 
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
-    const params = req.query as Params;
-    const error = checkQuery(params)
-    if(error) {
-        res.send({
-            error
-        })
-        return
-    }
-
-    try {
-      let result: { RequestId: string; RecordId: string }
-      const aliyun = new Aliyun(params)
-      const record = await aliyun.describeDomainRecords()
-      if(record.TotalCount > 0) {
-        const domainRecord = record.DomainRecords.Record[0]
-        if(domainRecord.Value !== params.ip) {
-          result = await aliyun.UpdateDomainRecord(domainRecord.RecordId)
-        } else {
-          result = {RecordId: domainRecord.RecordId, RequestId:"" }
-        }
-      } else {
-        result = await aliyun.addDomainRecord()
-      }
-      if (result.RecordId) {
-        res.send({
-          success: true
-        })
-      } else {
-        res.send(result)
-      }
-    } catch (e) {
-      res.send({
-        error: e
-      })
-    }
-}
+module.exports = recordDns(Aliyun);
