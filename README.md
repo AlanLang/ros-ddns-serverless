@@ -11,20 +11,27 @@ yarn vercel dev
 ## 部署
 直接部署在vercel上即可
 
+## 功能
+| 服务 | api url |
+| --- | --- |
+| 阿里云 | https://ros-ddns-serverless.vercel.app/api/aliyun |
+| cloudflare | https://ros-ddns-serverless.vercel.app/api/cloudflare |
+
 ## 使用
 添加ROS脚本，记得请求地址替换成自己的
 输入时最好把中文注释给删了
 ```
 :local identifier "" #id
 :local secret "" #token
-:local type 解析类型，默认为A
-:local record 需要解析的域名 
+:local type "A" #解析类型，默认为A
+:local name "www" #域名前缀
+:local domain "demo.com" #主机名
 :local pppoe "pppoe-out1" #确定你的路由器的网口名称
 :local ipaddr [/ip address get [/ip address find interface=$pppoe] address]
 :set ipaddr [:pick $ipaddr 0 ([len $ipaddr] -3)]
 :global aliip
 :if ($ipaddr != $aliip) do={
-    :local result [/tool fetch url="https://ros-ddns-serverless.vercel.app/api/aliyun?identifier=$identifier&secret=$secret&record=$record&type=$type&ip=$ipaddr" as-value output=user];
+    :local result [/tool fetch url="https://ros-ddns-serverless.vercel.app/api/aliyun?identifier=$identifier&secret=$secret&record=$record&type=$type&ip=$ipaddr&domain=$domain" as-value output=user];
     :set aliip $ipaddr
 }
 ```
