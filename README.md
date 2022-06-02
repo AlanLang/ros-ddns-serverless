@@ -17,6 +17,16 @@ yarn vercel dev
 | 阿里云 | https://ros-ddns-serverless.vercel.app/api/aliyun |
 | cloudflare | https://ros-ddns-serverless.vercel.app/api/cloudflare |
 
+## 参数介绍
+| 参数 | 介绍 |
+| --- | --- |
+| identifier | 阿里云对应的是 AccessKey ID，cloudflare 对应的是 区域 ID |
+| secret | 阿里云对应的是 AccessKey Secret, cloudflare 对应的是 api token |
+| type | 解析类型，A CHAME 等 |
+| name | 域名前缀 |
+| domain | 主机名 |
+| ip | ip 地址 |
+
 ## 使用
 添加ROS脚本，记得请求地址替换成自己的
 输入时最好把中文注释给删了
