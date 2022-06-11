@@ -1,6 +1,8 @@
 ## ROS上设置DDNS
 网上看的教程中，都是用的他们提供的接口服务，不太敢用，所以还是自己搭一个比较靠谱
-具体ROS的如何使用可以参考这篇文章：https://www.alanlang.net/archives/ros%E8%B7%AF%E7%94%B1%E5%99%A8%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97#%E4%BB%80%E4%B9%88%E6%98%AFrouteros
+具体ROS的如何使用可以参考这篇文章：
+
+https://www.alanlang.net/archives/ros%E8%B7%AF%E7%94%B1%E5%99%A8%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97
 
 ## 调试
 ```
